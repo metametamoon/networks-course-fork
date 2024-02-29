@@ -2,7 +2,7 @@ use std::{
     fs::File,
     io::{BufRead, BufReader, Read, Write},
     net::*,
-    path::Path,
+    path::Path, thread,
 };
 
 fn main() {
@@ -16,7 +16,7 @@ fn main() {
     let listener = TcpListener::bind(format!("127.0.0.1:{}", port)).unwrap();
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        handle_connection(stream);
+        thread::spawn(|| handle_connection(stream));
     }
     println!("Hello, world!");
 }
