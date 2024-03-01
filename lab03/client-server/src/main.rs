@@ -1,4 +1,4 @@
-use std::{fmt::format, io::{stdin, Read, Write}, net::TcpStream, str::from_utf8};
+use std::{io::{Read, Write}, net::TcpStream, str::from_utf8};
 
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
