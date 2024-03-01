@@ -1,9 +1,16 @@
+mod threadpool;
+
 use std::{
     fs::File,
     io::{BufRead, BufReader, Read, Write},
     net::*,
-    path::Path, thread,
+    path::Path,
+    thread::{self, sleep, JoinHandle}, time::Duration,
 };
+
+use crate::threadpool::ThreadPool;
+
+
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
@@ -12,16 +19,20 @@ fn main() {
     } else {
         1337
     };
+    let thread_pool = ThreadPool::new(6);
     println!("Opened at port {}", port);
     let listener = TcpListener::bind(format!("127.0.0.1:{}", port)).unwrap();
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        thread::spawn(|| handle_connection(stream));
+        thread_pool.execute(|| handle_connection(stream));
+        // thread::spawn(|| handle_connection(stream));
     }
     println!("Hello, world!");
 }
 
 fn handle_connection(mut stream: TcpStream) {
+    // println!("Connection received; waiting 15s");
+    // sleep(Duration::from_secs(15));
     let reader = BufReader::new(&mut stream);
     let request = reader
         .lines()
