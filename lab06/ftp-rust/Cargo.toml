@@ -1,0 +1,7 @@
+[package]
+name = "ftp-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ftp = "3.0.1"
