@@ -1,5 +1,5 @@
-use std::collections::{HashMap, HashSet, VecDeque};
 use rand::Rng;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 const INF: f64 = f64::INFINITY;
 
@@ -14,11 +14,13 @@ struct UpdateQuery {
 struct RipSimulator {
     nodes: HashSet<NodeT>,
     known_info: HashMap<(NodeT, NodeT), (f64, NodeT)>,
-    update_queue: VecDeque<UpdateQuery>
+    update_queue: VecDeque<UpdateQuery>,
+    hop_count: i32,
 }
 
 impl RipSimulator {
     fn process_one_step(&mut self, edges: HashMap<(NodeT, NodeT), f64>) {
+        self.hop_count += 1;
         let top = self.update_queue.pop_back().unwrap();
         let mut updated = false;
         for nbr in &self.nodes {
@@ -32,9 +34,6 @@ impl RipSimulator {
             }
             if distance_via_src < known_distance {
                 updated = true;
-                if distance_via_src == 0.0 {
-                    println!("Here!");
-                }
                 self.known_info.insert(
                     (top.node_to_update, *nbr),
                     (distance_via_src, top.node_source),
@@ -91,8 +90,13 @@ impl RipSimulator {
     }
 
     fn print_state(&mut self) {
+        println!("After hop {}", self.hop_count);
+        println!(
+            "{:<8} {:<8} {:<8} {:.8}",
+            "src ip", "dst ip", "metric", "next_hop"
+        );
         for ((node, nbr), way_info) in &self.known_info {
-            println!("{} -[w={}]-> {} via {}", node, way_info.0, nbr, way_info.1)
+            println!("{:<8} {:<8} {:.8} {:.8}", node, nbr, way_info.0, way_info.1)
         }
     }
 }
@@ -127,6 +131,7 @@ fn main() {
         nodes,
         known_info: Default::default(),
         update_queue: Default::default(),
+        hop_count: 0,
     };
 
     sim.init_known_info(edges.clone());
@@ -140,6 +145,7 @@ fn main() {
             break;
         }
         sim.process_one_step(edges.clone());
+        sim.print_state();
     }
     sim.print_state();
 }
